@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proveedores</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='suppliers.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="text-center mb-4">Gestión de Proveedores</h1>
+
+<!-- Búsqueda -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <input type="text" class="form-control" id="searchInput" placeholder="Buscar proveedor..." style="max-width: 300px;">
+</div>
+
+<!-- Tabla -->
+<table class="table table-bordered table-hover">
+  <thead class="table-dark">
+    <tr>
+      <th>Nombre</th>
+      <th>Apellido Paterno</th>
+      <th>Apellido Materno</th>
+      <th>Dirección</th>
+      <th>Celular</th>
+      <th>Nota</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody id="supplierTable">
+    {% for supplier in suppliers %}
+    <tr>
+        <td>{{ supplier.nombre }}</td>
+        <td>{{ supplier.apellidoP }}</td>
+        <td>{{ supplier.apellidoM }}</td>
+        <td>{{ supplier.direccion }}</td>
+        <td>{{ supplier.celular }}</td>
+        <td>{{ supplier.nota }}</td>
+        <td>
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#supplierModal"
+                data-action="/edit_supplier/{{ supplier.nombre }}"
+                data-name="{{ supplier.nombre }}"
+                data-appat="{{ supplier.apellidoP }}"
+                data-apmat="{{ supplier.apellidoM }}"
+                data-direction="{{ supplier.direccion }}"
+                data-celular="{{ supplier.celular }}"
+                data-nota="{{ supplier.nota }}">
+                <i class="bi bi-pencil-square"></i>
+            </button>
+            <a href="{{ url_for('delete_supplier', supplier_name=supplier.nombre) }}" class="btn btn-danger btn-sm">
+                <i class="bi bi-trash"></i>
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Botón flotante -->
+<button class="floating-button" data-bs-toggle="modal" data-bs-target="#addSupplierModal">+</button>
+
+<!-- Modal para agregar proveedor -->
+<div class="modal fade" id="addSupplierModal" tabindex="-1" aria-labelledby="addSupplierModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addSupplierModalLabel">Nuevo Proveedor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST">
+        <div class="modal-body">
+          <label>Nombre</label>
+          <input type="text" class="form-control mb-2" name="nombre" required>
+          <label>Apellido Paterno</label>
+          <input type="text" class="form-control mb-2" name="apellidoP" required>
+          <label>Apellido Materno</label>
+          <input type="text" class="form-control mb-2" name="apellidoM" required>
+          <label>Dirección</label>
+          <input type="text" class="form-control mb-2" name="direccion" required>
+          <label>Celular</label>
+          <input type="text" class="form-control mb-2" name="celular" required>
+          <label>Nota</label>
+          <textarea class="form-control mb-2" name="nota" rows="3"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+    const searchInput = document.getElementById("searchInput");
+    const supplierTable = document.getElementById("supplierTable");
+
+    searchInput.addEventListener("keyup", function () {
+        const filter = searchInput.value.toLowerCase();
+        const rows = supplierTable.getElementsByTagName("tr");
+
+        Array.from(rows).forEach(row => {
+            const nameCell = row.querySelector("td"); // primer <td> = nombre
+            const name = nameCell ? nameCell.textContent.trim().toLowerCase() : "";
+            row.style.display = name.includes(filter) ? "" : "none";
+        });
+    });
+
+
+  const supplierModal = document.getElementById('addSupplierModal');
+  supplierModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const form = supplierModal.querySelector('form');
+
+    const isEdit = button.hasAttribute('data-name');
+    form.action = isEdit ? button.getAttribute('data-action') : '/suppliers';
+
+    form.querySelector('[name="nombre"]').value = button.getAttribute('data-name') || "";
+    form.querySelector('[name="apellidoP"]').value = button.getAttribute('data-appat') || "";
+    form.querySelector('[name="apellidoM"]').value = button.getAttribute('data-apmat') || "";
+    form.querySelector('[name="direccion"]').value = button.getAttribute('data-direction') || "";
+    form.querySelector('[name="celular"]').value = button.getAttribute('data-celular') || "";
+    form.querySelector('[name="nota"]').value = button.getAttribute('data-nota') || "";
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.textContent = isEdit ? 'Actualizar' : 'Guardar';
+  });
+</script>
+{% endblock %}
+</html>

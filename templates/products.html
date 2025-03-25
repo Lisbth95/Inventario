@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Productos</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='products.css') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+
+  </style>
+</head>
+{% extends 'base.html' %}
+<body>
+    {% block content %}  
+
+        <div class="container">
+            <h1 class="text-center my-5">Gestión de Productos</h1>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+            <input type="text" class="form-control search-input" id="searchInput" placeholder="Buscar producto...">
+            </div>
+
+            <div class="table-container">
+            <table class="table table-hover table-bordered">
+                <thead class="table-dark">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="productTable">
+                {% for product in products %}
+                <tr>
+                    <td>{{product.nombre}}</td>
+                    <td>{{product.cantidad}}</td>
+                    <td>{{product.precio}}</td>
+                    <td>
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal"
+                            data-action="/edit_product/{{ product.nombre }}"
+                            data-name="{{ product.nombre }}"
+                            data-quantity="{{ product.cantidad }}"
+                            data-price="{{ product.precio }}">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <a href="{{url_for('delete_products', product_name=product.nombre)}}" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+
+        <!-- Botón flotante -->
+        <button class="floating-button" data-bs-toggle="modal" data-bs-target="#addProductModal">+</button>
+
+        <!-- Modal para añadir producto -->
+        <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="addProductModalLabel">Nuevo Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST">
+                <div class="modal-body">
+                    <label>Nombre</label>
+                    <input type="text" class="form-control mb-3" name="nombre" required>
+                    <label>Precio</label>
+                    <input type="text" class="form-control mb-3" name="precio" required>
+                    <label>Cantidad</label>
+                    <input type="text" class="form-control mb-3" name="cantidad" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+                </form>
+            </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            const searchInput = document.getElementById("searchInput");
+            const productTable = document.getElementById("productTable");
+
+            searchInput.addEventListener("keyup", function () {
+                const filter = searchInput.value.toLowerCase();
+                const rows = productTable.getElementsByTagName("tr");
+                Array.from(rows).forEach(row => {
+                    const nameCell = row.querySelector("td"); // primer <td> = nombre
+                    const name = nameCell ? nameCell.textContent.trim().toLowerCase() : "";
+                    row.style.display = name.includes(filter) ? "" : "none";
+                });
+            });
+
+            const productModal = document.getElementById('addProductModal');
+            productModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const form = productModal.querySelector('form');
+
+                const isEdit = button.hasAttribute('data-name');
+                form.action = isEdit ? button.getAttribute('data-action') : '/products';
+
+                form.querySelector('[name="nombre"]').value = button.getAttribute('data-name') || "";
+                form.querySelector('[name="precio"]').value = button.getAttribute('data-price') || "";
+                form.querySelector('[name="cantidad"]').value = button.getAttribute('data-quantity') || "";
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.textContent = isEdit ? 'Actualizar' : 'Guardar';
+            });
+        </script>
+    {% endblock %}
+</body>
+</html>

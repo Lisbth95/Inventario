@@ -1,0 +1,29 @@
+body {
+    background: #ffffff !important;
+    font-family: 'Segoe UI', sans-serif;
+}
+body::before {
+    background: #fff;
+}
+.floating-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #616079;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    cursor: pointer;
+    z-index: 999;
+  }
+  .table-container {
+    margin-top: 40px;
+  }
+  .search-input {
+    max-width: 300px;
+    margin-bottom: 20px;
+  }
